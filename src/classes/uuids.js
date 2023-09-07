@@ -49,17 +49,21 @@ export function generateShort() {
 }
 
 /**
- * Generates and returns a semi-human readable id by concatenating a human readable id and a shortuuid
+ * Generates and returns an object containing 3 ids.
+ * const {short, long} = generateShortPair()
+ * const human = generateHumanReadable()
  * 
- * @function generateNamedShort
+ * @function generateInstanceIdObject
  *
  * ### RETURNS
- * @returns {String} e.g: "human-readable-12-dadsda5423rfacsa"
+ * @returns {Object} { short: short, long: long, human: concat(human-short) }
  *
  * @author Dan Barker <dan@dan-barker.co.uk>
  */
-export function generateNamedShort() {
-    return `${generateHumanReadable}-${generateShort()}`
+export function generateInstanceIdObject() {
+    const { short, long } = generateShortPair()
+    const human = generateHumanReadable()
+    return {short: short, long: long, human: `${human}-${short}`}
 }
 
 /**

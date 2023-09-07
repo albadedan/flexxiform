@@ -2,6 +2,8 @@
 import * as uuid from '../classes/uuids'
 import BuildAppBar from '../components/BuildAppBar.vue'
 import BuildToolbar from '../components/BuildToolbar.vue';
+import ElementTemplate from '../components/ElementTemplate.vue'
+import CSpacer from '../components/CSpacer.vue'
 import { useElementStore } from '../stores/elementStore'
 export default {
     setup() {
@@ -11,6 +13,8 @@ export default {
     components: {
         BuildAppBar,
         BuildToolbar,
+        ElementTemplate,
+        CSpacer,
     },
     data() {
         return {
@@ -29,17 +33,27 @@ export default {
             elementDrag: false,
 
             // selection control
-            selected: { type: undefined, id: undefined },
-
+            selectedSection: -1,
+            selectedField: -1,
+            
             form: {},
-            blankSection: { id: "", name: 'Section Name', desc: 'Section Description' }
-
-
+            //blankSection: { id: "", name: 'Section Name', desc: 'Section Description' }
+            
+            
         }
+    },
+    computed: {
+        dragOptions() {
+            return {
+                animation: 200,
+                disabled: false,
+                ghostClass: "ghost"
+            };
+        },
     },
     mounted() {
 
-        this.formElements = this.elements.list
+        this.formElements = this.elements.getElements()
 
         if (this.getExistingForm) {
             // fetch
@@ -52,9 +66,6 @@ export default {
                 sections: []
             }
             this.insertNewSectionAtEnd()
-            this.insertNewSectionAtEnd()
-            this.insertNewSectionAtEnd()
-            this.dev_pushElements()
         }
     },
     methods: {
@@ -78,27 +89,53 @@ export default {
                 elements: []
             }
         },
-        dev_pushElements: function() {
-            for (let i = 0; i < this.form.sections.length; i++) {
-                this.form.sections[i].elements.push(...this.elements.list)
-                this.form.sections[i].elements[this.form.sections[i].elements.length - 1].instanceId = uuid.generateNamedShort()
-            }
-
-        },
         log: function(event) {
             console.log("🚀 ~ file: BuildView.vue:88 ~ event:", event)
+        },
+        cloneElement: function(element) {
+            // get a new instance id object
+            const instanceObject = uuid.generateInstanceIdObject()
+            const newElement = JSON.parse(JSON.stringify(element))
+
+            newElement.id = instanceObject.long
+            newElement.instanceId = instanceObject.human
+
+            return newElement
+        },
+        updateDetailsPanelFor: function(obj) {
+            this.selectedSection = -1
+            this.selectedField = -1
+            console.log("🚀 ~ file: BuildView.vue:106 ~ updateDetailsPanelFor ~ obj:", obj)
+            this.selectedSection = obj.section
+            console.log("🚀 ~ file: BuildView.vue:108 ~ this.selectedSection:", this.selectedSection)
+            this.selectedField = obj.field
+            console.log("🚀 ~ file: BuildView.vue:110 ~ this.selectedField:", this.selectedField)
+        },
+        // getSelectedObjectKeys() {
+        //     return Object.keys(this.form.sections[this.selectedSection].elements[this.selectedField].options)
+        // },
+        getSelectedObjectKeys(obj) {
+            return Object.keys(obj.options)
+        },
+        moveUp: function(obj) {
+            console.log("🚀 ~ file: Move UP", obj)
+            
+        },
+        moveDown: function(obj) {
+            console.log("🚀 ~ file: Move DOWN", obj)
         }
     }
 }
 </script>
 
 <template>
-    <v-app-bar elevation="0">
+    <v-app-bar v-once elevation="0">
         <BuildAppBar
         :disabled="publishingDisabled"></BuildAppBar>
     </v-app-bar>
 
     <v-navigation-drawer
+    v-once
     location="left"
     :rail="hideElementsPanel">
         <BuildToolbar
@@ -122,16 +159,20 @@ export default {
 
                     <draggable
                     v-model="formElements"
-                    group="elementGroup"
-                    @start="$event => log($event)"
+                    v-bind="dragOptions"
+                    :group="{ name: 'elementGroup', pull: 'clone', put: false }"
+                    @start="elementDrag = true"
                     @end="elementDrag = false"
-                    item-key="">
+                    item-key="templateId"
+                    :clone="cloneElement">
                         <template #item="{element: fieldTemplate}">
                             <v-list-item
-                            :key="fieldTemplate.id"
+                            :id="fieldTemplate.templateId"
+                            :key="fieldTemplate.templateId"
                             :title="fieldTemplate.name"
                             :subtitle="fieldTemplate.sub"
-                            :prepend-icon="fieldTemplate.icon"></v-list-item>
+                            :prepend-icon="fieldTemplate.icon"
+                            class="draggableItem"></v-list-item>
                         </template>
                     </draggable>
                     
@@ -145,32 +186,48 @@ export default {
     <v-main scrollable>
         <v-container fluid>
             <v-card>
-                <v-row>
-                    <v-col>
-                        <v-card-title>
-                            Form
-                        </v-card-title>
-                    </v-col>
-                    <v-col>
-                        <v-card-title>
-                            Preview
-                        </v-card-title>
-                    </v-col>
-                </v-row>
-                <v-divider></v-divider>
+                <v-toolbar density="compact">
+                    <CSpacer :horizontal="true"></CSpacer>
+                    <v-icon :icon="form.icon"></v-icon>
+                    <v-toolbar-title>{{ form.name }}</v-toolbar-title>
+                    <v-toolbar-items>
+                        <v-tooltip
+                        text="Edit Form Details"
+                        location="bottom">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" icon="mdi-form-textbox"></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip
+                        text="Peek Code"
+                        location="bottom">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" icon="mdi-code-json"></v-btn>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip
+                        text="Preview"
+                        location="bottom">
+                            <template v-slot:activator="{ props }">
+                                <v-btn v-bind="props" icon="mdi-eye-outline"></v-btn>
+                            </template>
+                        </v-tooltip>
+                    </v-toolbar-items>
+                </v-toolbar>
                 <v-container>
 
                     <!-- A. START OF SECTION AREA OF FORM -->
                     <!-- ?? B.1 START OF SECTION DRAG CONTROL -->
                     <draggable
                     v-model="form.sections"
+                    v-bind="dragOptions"
                     group="formSections"
                     @start="sectionDrag = true"
                     @end="sectionDrag = false"
                     item-key="id">
 
                         <!-- ?? B.2 START OF SECTION DRAG TEMPLATE -->
-                        <template #item="{element: section}">
+                        <template #item="{element: section, index: sectionIndex }">
 
                             <div>
                                 <!-- ?? B.3 EACH ROW REPRESENTS ONE WHOLE SECTION -- START -->
@@ -193,7 +250,7 @@ export default {
                                                             <v-icon icon="mdi-drag"></v-icon>
                                                             <v-toolbar-title>
                                                                 <v-toolbar-title>
-                                                                    ({{ form.sections.indexOf(section) + 1 }}) {{ section.name }}
+                                                                    [{{ sectionIndex + 1 }}] {{ section.name }}
                                                                 </v-toolbar-title>
                                                             </v-toolbar-title>
                                                             <v-spacer></v-spacer>
@@ -231,25 +288,30 @@ export default {
 
                                                                     <!-- @@ E.1 START OF DRAG ELEMENT CONTROL -->
                                                                     <v-card-text>
-                                                                        
+
                                                                         <!-- $$ F.1 START OF ELEMENT DRAG COMPONENT -->
                                                                         <draggable
                                                                         v-model="section.elements"
+                                                                        v-bind="dragOptions"
                                                                         group="elementGroup"
                                                                         @start="elementDrag = true"
                                                                         @end="elementDrag = false"
                                                                         item-key="instanceId">
 
-                                                                            <template #item="{element: field}">
+                                                                            <template #item="{element: field, index: fieldIndex}">
                                                                                 <v-container fluid>
-                                                                                    <v-card elevation="1">
                                                                                         <v-row>
                                                                                             <v-col>
-                                                                                                <v-card-title>{{ field }}</v-card-title>
+                                                                                                <ElementTemplate
+                                                                                                :source="field"
+                                                                                                source-depth="element"
+                                                                                                :parent-id="section.id"
+                                                                                                @click="updateDetailsPanelFor({section: sectionIndex, field: fieldIndex})"
+                                                                                                @move-up="moveUp"
+                                                                                                @move-down="moveDown"
+                                                                                                ></ElementTemplate>
                                                                                             </v-col>
-                                                                                            <v-col></v-col>
                                                                                         </v-row>
-                                                                                    </v-card>
                                                                                 </v-container>
                                                                             </template>
 
@@ -296,15 +358,126 @@ export default {
     location="right"
     :rail="hideDetailsPanel">
         <BuildToolbar
-
+        v-memo="[selectedSection, selectedField]"
         title="Details"
         :hide-points-left="false"
         @click="$event => hideDetailsPanel = $event">
     
             <template #content>
+                <template v-if="this.selectedField > -1">
+                    <h5>
+                        {{ form.sections[selectedSection].elements[selectedField].instanceId }}
+                    </h5>
+                    <v-list
+                    v-for="(option, optionIndex) in getSelectedObjectKeys(form.sections[selectedSection].elements[selectedField])"
+                    :key="optionIndex"
+                    density="compact"
+                    >
+                        <v-list-item>
+                            {{ form.sections[selectedSection].elements[selectedField].options[option].uiLabel }}
+                            <CSpacer :vertical="true"></CSpacer>
+                            <template
+                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'string'">
+                                <v-text-field
+                                density="compact"
+                                variant="outlined"
+                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                :persistent-hint="true"
+                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
+                                ></v-text-field>
+                            </template>
 
+                            <template
+                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'bool'">
+                                <v-checkbox
+                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                :persistent-hint="true"
+                                :label="String(form.sections[selectedSection].elements[selectedField].options[option].value)"
+                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
+                                ></v-checkbox>
+                            </template>
+
+                            <template
+                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'select'">
+                                <v-select
+                                density="compact"
+                                variant="outlined"
+                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                :persistent-hint="true"
+                                :items="elements.getChoicesByKey(option)"
+                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"></v-select>
+                            </template>
+
+                            <template
+                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'radio'">
+                                <v-radio-group
+                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                :persistent-hint="true"
+                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
+                                density="compact">
+                                    <v-radio
+                                    v-for="radio in elements.getChoicesByKey(option)"
+                                    :key="radio"
+                                    :label="radio" value="radio"></v-radio>
+                                </v-radio-group>
+                            </template>
+                                
+                        </v-list-item>
+                        <CSpacer :vertical="true" ></CSpacer>
+                        <v-divider></v-divider>
+                    </v-list>
+                </template>
             </template>
 
         </BuildToolbar>
     </v-navigation-drawer>
 </template>
+
+<style scoped>
+
+.draggableItem:hover {
+    cursor:grab;
+}
+
+.clickableItem:hover {
+    cursor:pointer;
+}
+
+.cardHover:hover {
+    box-shadow: 0 0 11px #183892;
+}
+
+.sectionGroupItem:hover {
+    background-color:#5ab3fc;
+}
+.elementGroupItem:hover {
+    background-color:#2370bd;
+}
+
+.fieldElementItem:hover {
+    background-color:#183892;
+}
+
+.ghost {
+    opacity: 0.5;
+    background: #c8ebfb;
+}
+
+.leftPanel {
+    position: sticky;
+    top:0;
+    left: 0px;
+    z-index: 2;
+}
+
+.rightPanel {
+    position: sticky;
+    top:0;
+    right: 0px;
+    z-index: 2;
+}
+
+.scroller {
+    height: 100%;
+}
+</style>
