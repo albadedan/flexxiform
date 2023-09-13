@@ -2,8 +2,38 @@ import { defineStore } from 'pinia'
 //import * as uuid from '../classes/uuids'
 
 export const useElementStore = defineStore('elements', {
-    state: () => ({ 
-        elementArray: [
+    state: () => ({
+        sectionArray: [ 
+            { type: 'subheader', name: 'Sections' },
+            {
+                id: '',
+                templateId: 0,
+                instanceId: '',
+                name: 'Section',
+                sub: '',
+                desc: 'Section Description',
+                icon: 'mdi-book-open-page-variant-outline',
+                dragGroup: 'formSections',
+                vType: 'ffSection',
+                elements: [],
+                options: {}
+            },
+        ],
+        uiArray: [
+            { type: 'subheader', name: 'Presentation' },
+            {
+                id: '',
+                templateId: 0,
+                instanceId: '',
+                name: 'Header',
+                sub: 'Fixed Text',
+                icon: 'mdi-format-header-pound',
+                vType: 'uiText',
+                options: {}
+            },
+        ],
+        inputArray: [
+            { type: 'subheader', name: 'Fields' },
             {
                 id: '',
                 templateId: 0,
@@ -200,21 +230,42 @@ export const useElementStore = defineStore('elements', {
         choices: (state) => state.staticChoices
     },
     actions: {
-        getElements() {
+        getElements(/** @type {string} */ kind) {
             // for each element of the elements array,
             // we need copy all of the common keys and values into the options object.
             // Then we need to check the element's vType and also add each key and value for the corresponding vType key in the detailsPanelOptions Object.
-            
-            const arr = [...this.elementArray]
+            let arrName = ''
+            switch(kind) {
+                case 'section':
+                    arrName = 'sectionArray'
+                    break;
+
+                case 'ui':
+                    arrName = 'uiArray'
+                    break;
+
+                case 'input':
+                    arrName = 'inputArray'
+                    break;
+
+                default:
+            }
+            const arr = [...this[arrName]]
             const common = {...this.detailsPanelOptions.common}
 
             for (let i = 0; i < arr.length; i++) {
-                arr[i].templateId = i + 1
-                arr[i].options = {...common, ...this.detailsPanelOptions[arr[i].vType]}
+                if (typeof arr[i].type === typeof undefined) {
+                    arr[i].templateId = i + 1
+                    arr[i].options = {...common, ...this.detailsPanelOptions[arr[i].vType]}
+                }
             }
 
             return arr
 
+        },
+        getBlankSection() {
+            const arr = [...this.getElements('section')]
+            return arr[1]
         },
         getChoicesByKey( /** @type {string} */ key) {
             return this.staticChoices[key] || []

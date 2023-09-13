@@ -1,4 +1,16 @@
 <script>
+/**
+ * Provides an easier vertical and/or horizontal spacer module.
+ * Renders a div with customisable proportions
+ * 
+ * ### PROPS
+ * @param {boolean} [vertical] default = false; Create vertical space
+ * @param {number} [height] default = 10; Create vertical space of 10 pixels
+ * @param {boolean} [horizontal] default = false; Create horizontal space
+ * @param {number} [width] default = 10; Create horizontal space of 10 pixels
+ * 
+ * @author Dan Barker <dan@dan-barker.co.uk>
+ */
 export default {
     name: 'CSpacer',
     props: {

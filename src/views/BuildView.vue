@@ -3,6 +3,9 @@ import * as uuid from '../classes/uuids'
 import BuildAppBar from '../components/BuildAppBar.vue'
 import BuildToolbar from '../components/BuildToolbar.vue';
 import ElementTemplate from '../components/ElementTemplate.vue'
+import ToolbarButtons from '../components/ToolbarButtons.vue'
+import IdChip from '../components/IdChip.vue'
+import ModalView from '../components/ModalView.vue'
 import CSpacer from '../components/CSpacer.vue'
 import { useElementStore } from '../stores/elementStore'
 export default {
@@ -14,11 +17,21 @@ export default {
         BuildAppBar,
         BuildToolbar,
         ElementTemplate,
+        ToolbarButtons,
+        IdChip,
+        ModalView,
         CSpacer,
     },
     data() {
         return {
-            formElements: new Array(),
+            modalControl: {
+                show: false,
+                kind: 'delete'
+            },
+
+            sectionElements: new Array(),
+            uiElements: new Array(),
+            inputElements: new Array(),
 
             hideElementsPanel: false,
             hideDetailsPanel: false,
@@ -53,7 +66,9 @@ export default {
     },
     mounted() {
 
-        this.formElements = this.elements.getElements()
+        this.sectionElements = this.elements.getElements('section')
+        this.uiElements = this.elements.getElements('ui')
+        this.inputElements = this.elements.getElements('input')
 
         if (this.getExistingForm) {
             // fetch
@@ -61,7 +76,7 @@ export default {
             this.form = {
                 id: uuid.generateStandard(),
                 name: 'Form Name',
-                icon: 'mdi-book-open-page-variant-outline',
+                icon: 'mdi-clipboard-text-outline',
                 treatSectionsAsPages: false,
                 sections: []
             }
@@ -81,13 +96,11 @@ export default {
             }
         },
         generateBlankSection: function() {
-            return { 
-                id: uuid.generateStandard(),
-                hid: uuid.generateHumanReadable(),
-                name: 'Section Name',
-                desc: 'Section Description',
-                elements: []
-            }
+            const section = this.elements.getBlankSection()
+            const instanceObject = uuid.generateInstanceIdObject()
+            section.id = instanceObject.long
+            section.instanceId = instanceObject.human
+            return section
         },
         log: function(event) {
             console.log("🚀 ~ file: BuildView.vue:88 ~ event:", event)
@@ -103,13 +116,8 @@ export default {
             return newElement
         },
         updateDetailsPanelFor: function(obj) {
-            this.selectedSection = -1
-            this.selectedField = -1
-            console.log("🚀 ~ file: BuildView.vue:106 ~ updateDetailsPanelFor ~ obj:", obj)
-            this.selectedSection = obj.section
-            console.log("🚀 ~ file: BuildView.vue:108 ~ this.selectedSection:", this.selectedSection)
-            this.selectedField = obj.field
-            console.log("🚀 ~ file: BuildView.vue:110 ~ this.selectedField:", this.selectedField)
+            this.selectedSection = ( typeof obj.section === typeof undefined ? -1 : obj.section )
+            this.selectedField = ( typeof obj.field === typeof undefined ? -1 : obj.field )
         },
         // getSelectedObjectKeys() {
         //     return Object.keys(this.form.sections[this.selectedSection].elements[this.selectedField].options)
@@ -129,6 +137,31 @@ export default {
 </script>
 
 <template>
+    <ModalView
+    :show="modalControl.show"
+    @dismiss="modalControl.show = $event"
+    @cancel=""
+    @accept="">
+
+        <template #title>
+            <template v-if="modalControl.kind === 'delete'">
+                Are you sure?
+            </template>
+        </template>
+
+        <template #body>
+            <template v-if="modalControl.kind === 'delete'">
+                Are you sure want to delete {{ (selectedField > -1 ? `Field ${selectedField + 1} from ` : '' ) }} {{ (selectedSection > -1 ? `Section ${selectedSection + 1}` : '') }}?
+                <br>
+            </template>
+        </template>
+
+        <template #actions>
+            <template v-if="!modalControl.kind === 'delete'">
+                
+            </template>
+        </template>
+    </ModalView>
     <v-app-bar v-once elevation="0">
         <BuildAppBar
         :disabled="publishingDisabled"></BuildAppBar>
@@ -143,41 +176,90 @@ export default {
         @click="$event => hideElementsPanel = $event">
 
             <template #content>
-                <v-list
-                lines="one"
-                density="compact"
-                nav
-                >
+                <div id="sectionElementList">
+                    <v-list
+                    lines="one"
+                    density="compact"
+                    nav
+                    >
+                        <draggable
+                        v-model="sectionElements"
+                        v-bind="dragOptions"
+                        :group="{ name: 'formSections', pull: 'clone', put: false }"
+                        @start="elementDrag = true"
+                        @end="elementDrag = false"
+                        item-key="templateId"
+                        :clone="cloneElement">
+                            <template #item="{element: sectionTemplate}">
+                                <v-list-item
+                                :id="sectionTemplate.templateId"
+                                :key="sectionTemplate.templateId"
+                                :title="sectionTemplate.name"
+                                :subtitle="sectionTemplate.sub"
+                                :prepend-icon="sectionTemplate.icon"
+                                class="draggableItem"></v-list-item>
+                            </template>
+                        </draggable>
+                        
 
-                    <v-list-subheader>
-                        Sections
-                    </v-list-subheader>
+                    </v-list>
+                </div>
+                <div id="uiElementList">
+                    <v-list
+                    lines="one"
+                    density="compact"
+                    nav
+                    >
+                        <draggable
+                        v-model="uiElements"
+                        v-bind="dragOptions"
+                        :group="{ name: 'elementGroup', pull: 'clone', put: false }"
+                        @start="elementDrag = true"
+                        @end="elementDrag = false"
+                        item-key="templateId"
+                        :clone="cloneElement">
+                            <template #item="{element: uiTemplate}">
+                                <v-list-item
+                                :id="uiTemplate.templateId"
+                                :key="uiTemplate.templateId"
+                                :title="uiTemplate.name"
+                                :subtitle="uiTemplate.sub"
+                                :prepend-icon="uiTemplate.icon"
+                                class="draggableItem"></v-list-item>
+                            </template>
+                        </draggable>
+                        
 
-                    <v-list-subheader>
-                        Fields
-                    </v-list-subheader>
+                    </v-list>
+                </div>
+                <div id="inputElementList">
+                    <v-list
+                    lines="one"
+                    density="compact"
+                    nav
+                    >
+                        <draggable
+                        v-model="inputElements"
+                        v-bind="dragOptions"
+                        :group="{ name: 'elementGroup', pull: 'clone', put: false }"
+                        @start="elementDrag = true"
+                        @end="elementDrag = false"
+                        item-key="templateId"
+                        :clone="cloneElement">
+                            <template #item="{element: fieldTemplate}">
+                                <v-list-item
+                                :id="fieldTemplate.templateId"
+                                :key="fieldTemplate.templateId"
+                                :title="fieldTemplate.name"
+                                :subtitle="fieldTemplate.sub"
+                                :prepend-icon="fieldTemplate.icon"
+                                class="draggableItem"></v-list-item>
+                            </template>
+                        </draggable>
+                        
 
-                    <draggable
-                    v-model="formElements"
-                    v-bind="dragOptions"
-                    :group="{ name: 'elementGroup', pull: 'clone', put: false }"
-                    @start="elementDrag = true"
-                    @end="elementDrag = false"
-                    item-key="templateId"
-                    :clone="cloneElement">
-                        <template #item="{element: fieldTemplate}">
-                            <v-list-item
-                            :id="fieldTemplate.templateId"
-                            :key="fieldTemplate.templateId"
-                            :title="fieldTemplate.name"
-                            :subtitle="fieldTemplate.sub"
-                            :prepend-icon="fieldTemplate.icon"
-                            class="draggableItem"></v-list-item>
-                        </template>
-                    </draggable>
-                    
-
-                </v-list>
+                    </v-list>
+                </div>
             </template>
 
         </BuildToolbar>
@@ -216,136 +298,93 @@ export default {
                 </v-toolbar>
                 <v-container>
 
+
+                    <!-- !! BEGINNING OF NEW LITE WEIGHT FORM CONTROL -->
+                    <v-list>
+
+                        <draggable
+                        v-model="form.sections"
+                        v-bind="dragOptions"
+                        group="formSections"
+                        @start="sectionDrag = true"
+                        @end="sectionDrag = false"
+                        item-key="id"
+                        handle=".handle">
+                            <template #item="{element: section, index: sectionIndex}">
+                                <div
+                                :id="section.instanceId">
+                                    <v-card
+                                    :id="section.instanceId"
+                                    :key="section.instanceId"
+                                    variant="outlined"
+                                    density="compact"
+                                    elevation="0"
+                                    >
+                                    
+                                        <v-toolbar
+                                        density="compact"
+                                        class="draggableItem handle"
+                                        >
+                                            <CSpacer :horizontal="true"></CSpacer>
+                                            <v-icon :icon="section.icon" ></v-icon>
+                                            <v-toolbar-title>{{ `[${sectionIndex + 1}] ${section.name}` }}</v-toolbar-title>
+                                            <IdChip
+                                            :instance-id="section.instanceId"
+                                            parent-type="form"
+                                            ></IdChip>
+                                            <CSpacer :horizontal="true"></CSpacer>
+                                            <ToolbarButtons
+                                            @delete="selectedSection = sectionIndex; selectedField = -1; modalControl = { show: true, kind: 'delete'}"></ToolbarButtons>
+                                        </v-toolbar>
+
+                                        <v-card-text>
+                                            <v-list>
+                                                <draggable
+                                                v-model="section.elements"
+                                                v-bind="dragOptions"
+                                                group="elementGroup"
+                                                @start="elementDrag = true"
+                                                @end="elementDrag = false"
+                                                item-key="instanceId"
+                                                handle=".handle">
+                                                
+                                                    <template #item="{ element: field, index: fieldIndex }">
+                                                        <ElementTemplate
+                                                        :source="field"
+                                                        :index="fieldIndex"
+                                                        >
+                                                    
+                                                            <template #toolbarAppendSlot>
+                                                                <IdChip
+                                                                :instance-id="field.instanceId"
+                                                                parent-type="section"
+                                                                :parent-instance="section.instanceId"
+                                                                ></IdChip>
+                                                                <CSpacer :horizontal="true"></CSpacer>
+                                                                <ToolbarButtons
+                                                                @delete="selectedSection = sectionIndex; selectedField = fieldIndex; modalControl = { show: true, kind: 'delete'}"></ToolbarButtons>
+                                                            </template>
+
+                                                        </ElementTemplate>
+                                                    </template>
+
+                                                </draggable>
+                                            </v-list>
+                                        </v-card-text>
+
+                                    </v-card>
+                                    <CSpacer :vertical="true"></CSpacer>
+                                </div>
+                            </template>
+                        </draggable>
+
+                    </v-list>
+
+
                     <!-- A. START OF SECTION AREA OF FORM -->
                     <!-- ?? B.1 START OF SECTION DRAG CONTROL -->
-                    <draggable
-                    v-model="form.sections"
-                    v-bind="dragOptions"
-                    group="formSections"
-                    @start="sectionDrag = true"
-                    @end="sectionDrag = false"
-                    item-key="id">
-
-                        <!-- ?? B.2 START OF SECTION DRAG TEMPLATE -->
-                        <template #item="{element: section, index: sectionIndex }">
-
-                            <div>
-                                <!-- ?? B.3 EACH ROW REPRESENTS ONE WHOLE SECTION -- START -->
-                                <v-row>
-                                    <v-col>
-                                        <v-card
-                                        elevation="1">
-
-                                            <!-- ?? B.4 START OF SECTION VISIBILITY CONTROL -->
-                                            <v-expansion-panels>
-                                                <v-expansion-panel>
-
-                                                    <!-- ?? B.5 SECTION TITLE AREA -->
-                                                    <v-expansion-panel-title>
-
-                                                        <!-- ?? B.6 TOOLBAR FOR SECTION ACTIONS, SUCH AS MOVE -->
-                                                        <v-toolbar 
-                                                        density="compact">
-
-                                                            <v-icon icon="mdi-drag"></v-icon>
-                                                            <v-toolbar-title>
-                                                                <v-toolbar-title>
-                                                                    [{{ sectionIndex + 1 }}] {{ section.name }}
-                                                                </v-toolbar-title>
-                                                            </v-toolbar-title>
-                                                            <v-spacer></v-spacer>
-                                                            <v-toolbar-items
-                                                            variant="tonal">
-                                                                <v-btn
-                                                                icon="mdi-arrow-down-bold-outline"></v-btn>
-                                                                <v-btn
-                                                                icon="mdi-arrow-up-bold-outline"></v-btn>
-                                                            </v-toolbar-items>
-                                                        </v-toolbar>
-                                                        <!-- ?? B.6 END OF TOOLBAR FOR SECTION ACTIONS, SUCH AS MOVE -->
-
-                                                    </v-expansion-panel-title>
-                                                    <!-- ?? B.5 END OF SECTION TITLE AREA -->
-
-                                                    <!-- !! C.1 BEGINNING OF THIS SECTIONS'S ELEMENT AREA -->
-                                                    <v-expansion-panel-text>
-                                                        <v-expansion-panels>
-
-                                                            <!-- !! C.2 BEGINNING OF ELEMENT GROUP AREA -->
-                                                            <v-expansion-panel>
-
-                                                                <!-- !! C.3 BEGINNING OF ELEMENT GROUP CONTROL AREA -->
-                                                                <v-expansion-panel-title>
-                                                                    <v-toolbar density="compact">
-                                                                        <v-icon icon="mdi-drag"></v-icon>
-                                                                        <v-toolbar-title>Elements</v-toolbar-title>
-                                                                    </v-toolbar>
-                                                                </v-expansion-panel-title>
-                                                                <!-- !! C.3 END OF ELEMENT GROUP CONTROL AREA -->
-
-                                                                <!-- %% D.1 BEGINNING OF INDIVIDUAL ELEMENT AREA -->
-                                                                <v-expansion-panel-text>
-
-                                                                    <!-- @@ E.1 START OF DRAG ELEMENT CONTROL -->
-                                                                    <v-card-text>
-
-                                                                        <!-- $$ F.1 START OF ELEMENT DRAG COMPONENT -->
-                                                                        <draggable
-                                                                        v-model="section.elements"
-                                                                        v-bind="dragOptions"
-                                                                        group="elementGroup"
-                                                                        @start="elementDrag = true"
-                                                                        @end="elementDrag = false"
-                                                                        item-key="instanceId">
-
-                                                                            <template #item="{element: field, index: fieldIndex}">
-                                                                                <v-container fluid>
-                                                                                        <v-row>
-                                                                                            <v-col>
-                                                                                                <ElementTemplate
-                                                                                                :source="field"
-                                                                                                source-depth="element"
-                                                                                                :parent-id="section.id"
-                                                                                                @click="updateDetailsPanelFor({section: sectionIndex, field: fieldIndex})"
-                                                                                                @move-up="moveUp"
-                                                                                                @move-down="moveDown"
-                                                                                                ></ElementTemplate>
-                                                                                            </v-col>
-                                                                                        </v-row>
-                                                                                </v-container>
-                                                                            </template>
-
-                                                                        </draggable>
-                                                                        <!-- $$ F.1 END OF ELEMENT DRAG COMPONENT -->
-                                                                    
-                                                                    </v-card-text>
-                                                                    <!-- @@ E.1 END OF DRAG ELEMENT CONTROL -->
-
-                                                                </v-expansion-panel-text>
-                                                                <!-- %% D.1 END OF INDIVIDUAL ELEMENT AREA -->
-
-                                                            </v-expansion-panel>
-                                                            <!-- !! C.2 END OF ELEMENT GROUP AREA -->
-
-                                                        </v-expansion-panels>
-                                                    </v-expansion-panel-text>
-                                                    <!-- !! C.1 END OF THIS SECTIONS'S ELEMENT AREA -->
-
-                                                </v-expansion-panel>
-                                            </v-expansion-panels>
-                                            <!-- ?? B.4 END OF SECTION AREA VISIBILITY -->
-
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                                <!-- ?? B.3 END OF INDIVIDUAL SECTION -->
-                            </div>
-                            
-
-                        </template>
-                        <!-- ?? B.2 END OF SECTION DRAG TEMPLATE -->
-
-                    </draggable>
+                    
+                    
                     <!-- ?? B.1 END OF SECTION DRAG CONTROL -->
                     <!-- END OF SECTION AREA OF FORM -->
 
@@ -433,7 +472,7 @@ export default {
     </v-navigation-drawer>
 </template>
 
-<style scoped>
+<style>
 
 .draggableItem:hover {
     cursor:grab;
@@ -479,5 +518,9 @@ export default {
 
 .scroller {
     height: 100%;
+}
+
+.transparent {
+    background-color: rgba(0, 0, 0, 0);
 }
 </style>
