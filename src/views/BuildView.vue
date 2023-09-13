@@ -7,6 +7,7 @@ import ToolbarButtons from '../components/ToolbarButtons.vue'
 import IdChip from '../components/IdChip.vue'
 import ModalView from '../components/ModalView.vue'
 import CSpacer from '../components/CSpacer.vue'
+import PeekCode from '../components/PeekCode.vue'
 import { useElementStore } from '../stores/elementStore'
 export default {
     setup() {
@@ -21,6 +22,7 @@ export default {
         IdChip,
         ModalView,
         CSpacer,
+        PeekCode,
     },
     data() {
         return {
@@ -28,6 +30,8 @@ export default {
                 show: false,
                 kind: 'delete'
             },
+            
+            showCode: false,
 
             sectionElements: new Array(),
             uiElements: new Array(),
@@ -116,15 +120,82 @@ export default {
             return newElement
         },
         updateDetailsPanelFor: function(obj) {
+            console.log("🚀 ~ file: BuildView.vue:119 ~ obj:", obj)
             this.selectedSection = ( typeof obj.section === typeof undefined ? -1 : obj.section )
             this.selectedField = ( typeof obj.field === typeof undefined ? -1 : obj.field )
         },
         // getSelectedObjectKeys() {
         //     return Object.keys(this.form.sections[this.selectedSection].elements[this.selectedField].options)
         // },
-        getSelectedObjectKeys(obj) {
+        getSelectedObjectKeys: function(obj) {
             return Object.keys(obj.options)
         },
+        // moveElement: function(/** @type {Object} */ obj) {
+        // console.log("🚀 ~ file: BuildView.vue:129 ~ obj:", obj)
+
+        //     let moveAllowed = false
+        //     let moving = ''
+
+        //     // if selectedField < 0, we are moving a whole section
+        //     if (this.selectedField < 0) {
+        //         // moving a whole section
+        //         moving = 'section'
+
+        //         // for sections
+        //             // if selectedSection === 0, this at the top, cannot move up
+        //             // if selectedSection === form.sections.length, this is at the bottom, cannot move down
+
+        //         if (direction === 'up') {
+        //             // user wants to move the element up.
+        //             if (this.selectedSection > 0) {
+        //                 // element is not at the top, can be moved up
+        //                 moveAllowed = true
+        //             }
+        //         } else if (direction === 'down') {
+        //             // user want to move the element down
+        //             if (this.selectedSection < this.form.sections.length) {
+        //                 // element is not at the bottom, can be moved down
+        //                 moveAllowed = true
+        //             }
+        //         }
+                
+        //     } else {
+        //         // moving an input/ui element within a section
+        //         moving = 'field'
+
+        //         // for inputs/ui elements
+        //             // if selectedField === 0, this is at the top, cannot move up
+        //             // if selectedField === form.sections[selectedSection].elements.length, this is at the bottom, cannot move down
+
+        //         if (direction === 'up') {
+        //             // user want to move the input/ui element up
+        //             if (this.selectedField > 0) {
+        //                 // element is not at the top, move is allowed
+        //                 moveAllowed = true
+        //             }
+        //         } else if (direction === 'down') {
+        //             // user wants to move the element down
+        //             if (this.selectedField < this.form.sections[this.selectedSection].elements.length) {
+        //                 // element is not at the bottom, move is allowed
+        //                 moveAllowed = true
+        //             }
+        //         }
+        //     }
+
+
+        //     if (moveAllowed) {
+        //         // the move is allowed
+
+        //         if (moving === 'section') {
+        //             const element = this.form.sections[this.selectedSection]
+        //             this.form.sections.splice(this.selectedSection, 1)
+        //             this.form.sections.splice((direction === 'up' ? this.selectedSection - 1 : this.selectedSection + 1), 0, element)
+        //         }
+        //     }
+
+            
+
+        // },
         moveUp: function(obj) {
             console.log("🚀 ~ file: Move UP", obj)
             
@@ -137,11 +208,29 @@ export default {
 </script>
 
 <template>
+    <PeekCode :show="showCode" @update="showCode = $event">
+        <template #title>
+            <v-toolbar class="transparent">
+                <v-toolbar-title>Peek Code</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-toolbar-items>
+                    <v-btn
+                    color="error"
+                    variant="tonal"
+                    @click.stop="showCode = false">Close</v-btn>
+                </v-toolbar-items>
+            </v-toolbar>
+        </template>
+        <template #body>
+            <pre>
+                {{ JSON.stringify(form, null, 1) }}
+            </pre>
+        </template>
+    </PeekCode>
     <ModalView
     :show="modalControl.show"
     @dismiss="modalControl.show = $event"
-    @cancel=""
-    @accept="">
+    >
 
         <template #title>
             <template v-if="modalControl.kind === 'delete'">
@@ -157,8 +246,8 @@ export default {
         </template>
 
         <template #actions>
-            <template v-if="!modalControl.kind === 'delete'">
-                
+            <template v-if="modalControl.kind !== 'delete'">
+                <!-- awaiting implementation -->
             </template>
         </template>
     </ModalView>
@@ -284,7 +373,7 @@ export default {
                         text="Peek Code"
                         location="bottom">
                             <template v-slot:activator="{ props }">
-                                <v-btn v-bind="props" icon="mdi-code-json"></v-btn>
+                                <v-btn v-bind="props" icon="mdi-code-json" @click="showCode = true"></v-btn>
                             </template>
                         </v-tooltip>
                         <v-tooltip
@@ -327,13 +416,14 @@ export default {
                                         >
                                             <CSpacer :horizontal="true"></CSpacer>
                                             <v-icon :icon="section.icon" ></v-icon>
-                                            <v-toolbar-title>{{ `[${sectionIndex + 1}] ${section.name}` }}</v-toolbar-title>
+                                            <v-toolbar-title>{{ `[${sectionIndex + 1}] ${section.name}` }} ({{ section.elements.length }} elements)</v-toolbar-title>
                                             <IdChip
                                             :instance-id="section.instanceId"
                                             parent-type="form"
                                             ></IdChip>
                                             <CSpacer :horizontal="true"></CSpacer>
                                             <ToolbarButtons
+                                            @edit="updateDetailsPanelFor({ section: sectionIndex, field: -1 })"
                                             @delete="selectedSection = sectionIndex; selectedField = -1; modalControl = { show: true, kind: 'delete'}"></ToolbarButtons>
                                         </v-toolbar>
 
@@ -362,9 +452,9 @@ export default {
                                                                 ></IdChip>
                                                                 <CSpacer :horizontal="true"></CSpacer>
                                                                 <ToolbarButtons
+                                                                @edit="updateDetailsPanelFor({ section: sectionIndex, field: fieldIndex })"
                                                                 @delete="selectedSection = sectionIndex; selectedField = fieldIndex; modalControl = { show: true, kind: 'delete'}"></ToolbarButtons>
                                                             </template>
-
                                                         </ElementTemplate>
                                                     </template>
 
@@ -397,75 +487,87 @@ export default {
     location="right"
     :rail="hideDetailsPanel">
         <BuildToolbar
-        v-memo="[selectedSection, selectedField]"
         title="Details"
         :hide-points-left="false"
         @click="$event => hideDetailsPanel = $event">
     
             <template #content>
-                <template v-if="this.selectedField > -1">
-                    <h5>
-                        {{ form.sections[selectedSection].elements[selectedField].instanceId }}
-                    </h5>
-                    <v-list
-                    v-for="(option, optionIndex) in getSelectedObjectKeys(form.sections[selectedSection].elements[selectedField])"
-                    :key="optionIndex"
-                    density="compact"
-                    >
-                        <v-list-item>
-                            {{ form.sections[selectedSection].elements[selectedField].options[option].uiLabel }}
-                            <CSpacer :vertical="true"></CSpacer>
-                            <template
-                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'string'">
-                                <v-text-field
-                                density="compact"
-                                variant="outlined"
-                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
-                                :persistent-hint="true"
-                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
-                                ></v-text-field>
-                            </template>
+                
+                    <template v-if="selectedField > -1">
+                        <IdChip
+                        :instanceId="form.sections[selectedSection].elements[selectedField].instanceId"
+                        parent-type="input"
+                        :parent-instance="form.sections[selectedSection].instanceId"
+                        ></IdChip>
+                    </template>
+                    <template v-else-if="selectedSection > -1">
+                        <IdChip
+                        :instanceId="form.sections[selectedSection].instanceId"
+                        parent-type="section"
+                        ></IdChip>
+                    </template>
+                    <div></div>
+                    <template v-if="selectedField > -1">
+                        <v-list
+                        v-for="(option, optionIndex) in getSelectedObjectKeys(form.sections[selectedSection].elements[selectedField])"
+                        :key="optionIndex"
+                        density="compact"
+                        >
+                            <v-list-item>
+                                {{ form.sections[selectedSection].elements[selectedField].options[option].uiLabel }}
+                                <CSpacer :vertical="true"></CSpacer>
+                                <template
+                                v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'string'">
+                                    <v-text-field
+                                    density="compact"
+                                    variant="outlined"
+                                    :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                    :persistent-hint="true"
+                                    v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
+                                    ></v-text-field>
+                                </template>
 
-                            <template
-                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'bool'">
-                                <v-checkbox
-                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
-                                :persistent-hint="true"
-                                :label="String(form.sections[selectedSection].elements[selectedField].options[option].value)"
-                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
-                                ></v-checkbox>
-                            </template>
+                                <template
+                                v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'bool'">
+                                    <v-checkbox
+                                    :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                    :persistent-hint="true"
+                                    :label="String(form.sections[selectedSection].elements[selectedField].options[option].value)"
+                                    v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
+                                    ></v-checkbox>
+                                </template>
 
-                            <template
-                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'select'">
-                                <v-select
-                                density="compact"
-                                variant="outlined"
-                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
-                                :persistent-hint="true"
-                                :items="elements.getChoicesByKey(option)"
-                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"></v-select>
-                            </template>
+                                <template
+                                v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'select'">
+                                    <v-select
+                                    density="compact"
+                                    variant="outlined"
+                                    :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                    :persistent-hint="true"
+                                    :items="elements.getChoicesByKey(option)"
+                                    v-model="form.sections[selectedSection].elements[selectedField].options[option].value"></v-select>
+                                </template>
 
-                            <template
-                            v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'radio'">
-                                <v-radio-group
-                                :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
-                                :persistent-hint="true"
-                                v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
-                                density="compact">
-                                    <v-radio
-                                    v-for="radio in elements.getChoicesByKey(option)"
-                                    :key="radio"
-                                    :label="radio" value="radio"></v-radio>
-                                </v-radio-group>
-                            </template>
-                                
-                        </v-list-item>
-                        <CSpacer :vertical="true" ></CSpacer>
-                        <v-divider></v-divider>
-                    </v-list>
-                </template>
+                                <template
+                                v-if="form.sections[selectedSection].elements[selectedField].options[option].type === 'radio'">
+                                    <v-radio-group
+                                    :hint="form.sections[selectedSection].elements[selectedField].options[option].hint"
+                                    :persistent-hint="true"
+                                    v-model="form.sections[selectedSection].elements[selectedField].options[option].value"
+                                    density="compact">
+                                        <v-radio
+                                        v-for="radio in elements.getChoicesByKey(option)"
+                                        :key="radio"
+                                        :label="radio" value="radio"></v-radio>
+                                    </v-radio-group>
+                                </template>
+                                    
+                            </v-list-item>
+                            <CSpacer :vertical="true" ></CSpacer>
+                            <v-divider></v-divider>
+                        </v-list>
+                    </template>
+                
             </template>
 
         </BuildToolbar>

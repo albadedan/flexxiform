@@ -7,7 +7,7 @@ export default {
             type: Boolean,
             default: false,
             required: true
-        }
+        },
     },
     computed: {
         displayStatus: {
@@ -33,7 +33,7 @@ export default {
         <div class="text-center">
             <v-dialog
             v-model="displayStatus"
-            persistent
+            :persistent="true"
             width="auto"
             >
             <v-card>

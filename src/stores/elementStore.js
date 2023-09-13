@@ -72,6 +72,8 @@ export const useElementStore = defineStore('elements', {
                     value: 'Label',
                     uiLabel: 'Label',
                     hint: '',
+                    sortGroup: 'ui',
+                    sortNum: 0,
                     required: false
                 },
                 value: {
@@ -79,6 +81,8 @@ export const useElementStore = defineStore('elements', {
                     value: '',
                     uiLabel: 'Value',
                     hint: 'Provide a default value?',
+                    sortGroup: 'ui',
+                    sortNum: 1,
                     required: false
                 },
                 density: {
@@ -86,6 +90,8 @@ export const useElementStore = defineStore('elements', {
                     value: 'default',
                     uiLabel: 'Density',
                     hint: 'Set the density of the input field',
+                    sortGroup: 'ui',
+                    sortNum: 4.2,
                     required: false
                 },
                 disabled: {
@@ -93,6 +99,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Field is disabled?',
                     hint: 'Set whether or not this field is disabled',
+                    sortGroup: 'control',
+                    sortNum: 2,
                     required: false
                 },
                 flat: {
@@ -100,6 +108,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Flatten?',
                     hint: 'Removes elevation (shadow) added to element when using the solo or solo-inverted style',
+                    sortGroup: 'ui',
+                    sortNum: 4.1,
                     required: false
                 },
                 hideDetails: {
@@ -107,6 +117,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Hide details?',
                     hint: 'Hides hint text and validation errors',
+                    sortGroup: 'ui',
+                    sortNum: 3.2,
                     required: false
                 },
                 placeholder: {
@@ -114,6 +126,8 @@ export const useElementStore = defineStore('elements', {
                     value: 'Placeholder',
                     uiLabel: 'Placeholder Text',
                     hint: "Sets the input's placeholder text",
+                    sortGroup: 'ui',
+                    sortNum: 2,
                     required: false
                 },
                 variant: {
@@ -121,6 +135,8 @@ export const useElementStore = defineStore('elements', {
                     value: 'filled',
                     uiLabel: 'Style Variant',
                     hint: 'Applies a distinct style to the input',
+                    sortGroup: 'ui',
+                    sortNum: 4,
                     required: false
                 },
                 required: {
@@ -128,6 +144,8 @@ export const useElementStore = defineStore('elements', {
                     value: true,
                     uiLabel: 'Required?',
                     hint: 'Set whether or not the field is required',
+                    sortGroup: 'control',
+                    sortNum: 0,
                     required: false
                 },
                 requiredMode:{ 
@@ -135,6 +153,8 @@ export const useElementStore = defineStore('elements', {
                     value: 'default',
                     uiLabel: 'Required Mode',
                     hint: "Sets whether the field's required status uses the default boolean behaviour, or is calculated using a formula",
+                    sortGroup: 'control',
+                    sortNum: 0.1,
                     required: false
                 },
                 readonly: {
@@ -142,6 +162,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Readonly?',
                     hint: 'Sets whether or not the field is readonly',
+                    sortGroup: 'control',
+                    sortNum: 3,
                     required: false
                 },
                 hint: {
@@ -149,6 +171,8 @@ export const useElementStore = defineStore('elements', {
                     value: '',
                     uiLabel: 'Hint Text',
                     hint: 'Provide text that will appear under the input field to hint the user',
+                    sortGroup: 'ui',
+                    sortNum: 3,
                     required: false
                 },
                 persistentHint: {
@@ -156,6 +180,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Persistent Hint?',
                     hint: 'Sets whether or not the hint is always visible',
+                    sortGroup: 'ui',
+                    sortNum: 3.1,
                     required: false
                 },
             },
@@ -166,6 +192,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Clearable?',
                     hint: 'Appends a button which clears the input',
+                    sortGroup: 'ui',
+                    sortNum: 1.1,
                     required: false
                 },
                 persistentClear: {
@@ -173,6 +201,8 @@ export const useElementStore = defineStore('elements', {
                     value: false,
                     uiLabel: 'Persistent Clear Button?',
                     hint: 'Sets whether the clear buttons is always visible when the field has input',
+                    sortGroup: 'ui',
+                    sortNum: 1.2,
                     required: false
                 },
                 prefix: {
@@ -180,6 +210,8 @@ export const useElementStore = defineStore('elements', {
                     value: '',
                     uiLabel: 'Field Prefix',
                     hint: 'Prefixes a UI element to the input field, but does not prefix it to the data recorded',
+                    sortGroup: 'ui',
+                    sortNum: 1.3,
                     required: false
                 },
                 suffix: {
@@ -187,6 +219,8 @@ export const useElementStore = defineStore('elements', {
                     value: '',
                     uiLabel: 'Field Suffix',
                     hint: 'Adds a suffix UI element to the input field, but does not add the suffix to the data recorded',
+                    sortGroup: 'ui',
+                    sortNum: 1.4,
                     required: false
                 },
             },
@@ -200,6 +234,8 @@ export const useElementStore = defineStore('elements', {
                     value: true,
                     uiLabel: 'Auto grow?',
                     hint: 'Automatically grows and shrinks the height of the input as the user types',
+                    sortGroup: 'ui',
+                    sortNum: 1.01,
                     required: false
                 },
             },
@@ -252,6 +288,7 @@ export const useElementStore = defineStore('elements', {
             }
             const arr = [...this[arrName]]
             const common = {...this.detailsPanelOptions.common}
+            console.log("🚀 ~ file: elementStore.js:291 ~ getElements ~ common:", common)
 
             for (let i = 0; i < arr.length; i++) {
                 if (typeof arr[i].type === typeof undefined) {
