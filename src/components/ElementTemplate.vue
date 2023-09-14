@@ -26,6 +26,7 @@ export default {
 <template>
     <div>
         <v-card
+        v-memo="[source.props]"
         elevation="1"
         variant="outlined"
         :hover="!hover"
@@ -47,30 +48,76 @@ export default {
                 <v-row>
                     <v-col>
 
-                        <!-- Single line Text Field OR Numeric Text field -->
+                        <!-- Single line Text Field -->
                         <template
-                        v-if="source.vType === 'VTextField' || source.vType === 'VTextFieldNumeric'">
-
+                        v-if="source.vTypeMaster === 'VTextField'">
                             <v-text-field
-                            :type="source.options.htmlType"
-                            :v-model="source.options.value.value"
-                            :label="source.options.label.value"
-                            :density="source.options.density.value"
-                            :flat="source.options.flat.value"
-                            :disabled="source.options.disabled.value"
-                            :placeholder="source.options.placeholder.value"
-                            :variant="source.options.variant.value"
-                            :required="source.options.required.value"
-                            :readonly="source.options.readonly.value"
-                            :hint="source.options.hint.value"
-                            :persistent-hint="source.options.persistentHint.value"
-                            :hide-details="source.options.hideDetails.value"
-                            :clearable="source.options.clearable.value"
-                            :persistent-clear="source.options.persistentClear.value"
-                            :prefix="source.options.prefix.value"
-                            :suffix="source.options.suffix.value"
+                            v-bind.prop="source.props"
                             ></v-text-field>
+                        </template>
 
+                        <!-- Multiline Text Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VTextarea'">
+                            <v-textarea
+                            v-bind.prop="source.props"
+                            ></v-textarea>
+                        </template>
+
+                        <!-- Checkbox Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VCheckbox'">
+                            <v-checkbox
+                            v-bind.prop="source.props"
+                            ></v-checkbox>
+                        </template>
+
+                        <!-- Switch Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VSwitch'">
+                            <v-switch
+                            v-bind.prop="source.props"
+                            ></v-switch>
+                        </template>
+
+                        <!-- Radio Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VRadio'">
+                            <v-radio
+                            v-bind.prop="source.props"
+                            ></v-radio>
+                        </template>
+
+                        <!-- Range Slide Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VSlider'">
+                            <v-slider
+                            v-bind.prop="source.props"
+                            ></v-slider>
+                        </template>
+
+                        <!-- Select Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VSelect'">
+                            <v-select
+                            v-bind.prop="source.props"
+                            ></v-select>
+                        </template>
+
+                        <!-- Autocomplete Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VAutocomplete'">
+                            <v-autocomplete
+                            v-bind.prop="source.props"
+                            ></v-autocomplete>
+                        </template>
+
+                        <!-- File Input Field -->
+                        <template
+                        v-if="source.vTypeMaster === 'VFileInput'">
+                            <v-file-input
+                            v-bind.prop="source.props"
+                            ></v-file-input>
                         </template>
 
                     </v-col>
