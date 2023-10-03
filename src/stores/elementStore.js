@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import * as uuid from '../classes/uuids'
+import ValidationRules from '../classes/ValidationRules'
+const rules = new ValidationRules()
 
 export const useElementStore = defineStore('elements', {
     state: () => ({
@@ -58,39 +60,6 @@ export const useElementStore = defineStore('elements', {
             },
             {
                 id: '',
-                templateId: 2,
-                instanceId: '',
-                name: 'Checkbox',
-                sub: 'Toggle value(s)',
-                icon: 'mdi-checkbox-outline',
-                vTypeMaster: 'VCheckbox',
-                vType: ['common', 'VCheckbox'],
-                props: {}
-            },
-            {
-                id: '',
-                templateId: 3,
-                instanceId: '',
-                name: 'Switch',
-                sub: 'Toggle value(s)',
-                icon: 'mdi-toggle-switch-outline',
-                vTypeMaster: 'VSwitch',
-                vType: ['common', 'VCheckbox'],
-                props: {}
-            },
-            {
-                id: '',
-                templateId: 4,
-                instanceId: '',
-                name: 'Radio',
-                sub: 'Exclusive choice',
-                icon: 'mdi-radiobox-marked',
-                vTypeMaster: 'VRadio',
-                vType: ['common', 'VRadio'],
-                props: {}
-            },
-            {
-                id: '',
                 templateId: 5,
                 instanceId: '',
                 name: 'Range Slider',
@@ -133,512 +102,301 @@ export const useElementStore = defineStore('elements', {
                 vType: ['common', 'VFileInput'],
                 props: {}
             },
+            { type: 'subheader', name: 'GROUPS' },
+            {
+                id: '',
+                templateId: 2,
+                instanceId: '',
+                name: 'Switch',
+                sub: 'Toggle value(s)',
+                icon: 'mdi-toggle-switch-outline',
+                vTypeMaster: 'VSwitch',
+                vType: ['common', 'VCheckbox'],
+                props: {}
+            },
+            {
+                id: '',
+                templateId: 3,
+                instanceId: '',
+                name: 'Checkbox',
+                sub: 'Inclusive choice(s)',
+                icon: 'mdi-checkbox-outline',
+                vTypeMaster: 'VGroup',
+                vType: ['common', 'VCheckbox'],
+                vGroupElementType: 'VCheckbox',
+                props: {},
+                subElements: [],
+            },
+            {
+                id: '',
+                templateId: 4,
+                instanceId: '',
+                name: 'Radio',
+                sub: 'Exclusive choice',
+                icon: 'mdi-radiobox-marked',
+                vTypeMaster: 'VRadio',
+                vType: ['common', 'VRadio'],
+                props: {}
+            },
+
         ],
-        // detailsPanelOptions: {
-        //     common: {
-        //         label: {
-        //             type: 'string',
-        //             value: 'Label',
-        //             uiLabel: 'Label',
-        //             hint: '',
-        //             sortGroup: 'ui',
-        //             sortNum: 0,
-        //             required: false
-        //         },
-        //         value: {
-        //             type: 'string',
-        //             value: '',
-        //             uiLabel: 'Value',
-        //             hint: 'Provide a default value?',
-        //             sortGroup: 'ui',
-        //             sortNum: 1,
-        //             required: false
-        //         },
-        //         density: {
-        //             type: 'select',
-        //             value: 'default',
-        //             uiLabel: 'Density',
-        //             hint: 'Set the density of the input field',
-        //             sortGroup: 'ui',
-        //             sortNum: 4.2,
-        //             required: false
-        //         },
-        //         disabled: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Field is disabled?',
-        //             hint: 'Set whether or not this field is disabled',
-        //             sortGroup: 'control',
-        //             sortNum: 2,
-        //             required: false
-        //         },
-        //         flat: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Flatten?',
-        //             hint: 'Removes elevation (shadow) added to element when using the solo or solo-inverted style',
-        //             sortGroup: 'ui',
-        //             sortNum: 4.1,
-        //             required: false
-        //         },
-        //         hideDetails: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Hide details?',
-        //             hint: 'Hides hint text and validation errors',
-        //             sortGroup: 'ui',
-        //             sortNum: 3.2,
-        //             required: false
-        //         },
-        //         placeholder: {
-        //             type: 'string',
-        //             value: 'Placeholder',
-        //             uiLabel: 'Placeholder Text',
-        //             hint: "Sets the input's placeholder text",
-        //             sortGroup: 'ui',
-        //             sortNum: 2,
-        //             required: false
-        //         },
-        //         variant: {
-        //             type: 'select',
-        //             value: 'filled',
-        //             uiLabel: 'Style Variant',
-        //             hint: 'Applies a distinct style to the input',
-        //             sortGroup: 'ui',
-        //             sortNum: 4,
-        //             required: false
-        //         },
-        //         required: {
-        //             type: 'bool',
-        //             value: true,
-        //             uiLabel: 'Required?',
-        //             hint: 'Set whether or not the field is required',
-        //             sortGroup: 'control',
-        //             sortNum: 0,
-        //             required: false
-        //         },
-        //         requiredMode:{ 
-        //             type: 'radio',
-        //             value: 'default',
-        //             uiLabel: 'Required Mode',
-        //             hint: "Sets whether the field's required status uses the default boolean behaviour, or is calculated using a formula",
-        //             sortGroup: 'control',
-        //             sortNum: 0.1,
-        //             required: false
-        //         },
-        //         readonly: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Readonly?',
-        //             hint: 'Sets whether or not the field is readonly',
-        //             sortGroup: 'control',
-        //             sortNum: 3,
-        //             required: false
-        //         },
-        //         hint: {
-        //             type: 'string',
-        //             value: '',
-        //             uiLabel: 'Hint Text',
-        //             hint: 'Provide text that will appear under the input field to hint the user',
-        //             sortGroup: 'ui',
-        //             sortNum: 3,
-        //             required: false
-        //         },
-        //         persistentHint: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Persistent Hint?',
-        //             hint: 'Sets whether or not the hint is always visible',
-        //             sortGroup: 'ui',
-        //             sortNum: 3.1,
-        //             required: false
-        //         },
-        //     },
-        //     VTextField: {
-        //         htmlType: 'text',
-        //         clearable: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Clearable?',
-        //             hint: 'Appends a button which clears the input',
-        //             sortGroup: 'ui',
-        //             sortNum: 1.1,
-        //             required: false
-        //         },
-        //         persistentClear: {
-        //             type: 'bool',
-        //             value: false,
-        //             uiLabel: 'Persistent Clear Button?',
-        //             hint: 'Sets whether the clear buttons is always visible when the field has input',
-        //             sortGroup: 'ui',
-        //             sortNum: 1.2,
-        //             required: false
-        //         },
-        //         prefix: {
-        //             type: 'string',
-        //             value: '',
-        //             uiLabel: 'Field Prefix',
-        //             hint: 'Prefixes a UI element to the input field, but does not prefix it to the data recorded',
-        //             sortGroup: 'ui',
-        //             sortNum: 1.3,
-        //             required: false
-        //         },
-        //         suffix: {
-        //             type: 'string',
-        //             value: '',
-        //             uiLabel: 'Field Suffix',
-        //             hint: 'Adds a suffix UI element to the input field, but does not add the suffix to the data recorded',
-        //             sortGroup: 'ui',
-        //             sortNum: 1.4,
-        //             required: false
-        //         },
-        //     },
-        //     __numeric: {
-        //         htmlType: 'number',
-        //     },
-        //     __area: {
-        //         htmlType: 'textarea',
-        //         autoGrow: {
-        //             type: 'bool',
-        //             value: true,
-        //             uiLabel: 'Auto grow?',
-        //             hint: 'Automatically grows and shrinks the height of the input as the user types',
-        //             sortGroup: 'ui',
-        //             sortNum: 1.01,
-        //             required: false
-        //         },
-        //     },
-        // },
         detailsPanelOptions: [
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'type',
-                    type: 'select',
-                    lookupKey: 'htmlTypes',
-                    value: 'text',
-                    uiLabel: 'Field Type',
-                    hint: '',
-                    sortGroup: 'ui',
-                    sortNum: 0,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'label',
-                    type: 'string',
-                    value: 'Label',
-                    uiLabel: 'Label',
-                    hint: '',
-                    sortGroup: 'ui',
-                    sortNum: 0,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'value',
-                    type: 'string',
-                    value: '',
-                    uiLabel: 'Value',
-                    hint: 'Provide a default value?',
-                    sortGroup: 'ui',
-                    sortNum: 1,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'multiple',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Multiple',
-                    hint: 'Single or group of this element',
-                    sortGroup: 'ui',
-                    sortNum: 1.1,
-                    required: false,
-                    vType: [
-                        'VCheckbox',
-                        'VRadio'
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'density',
-                    type: 'select',
-                    lookupKey: 'density',
-                    value: 'compact',
-                    uiLabel: 'Density',
-                    hint: 'Set the density of the input field',
-                    sortGroup: 'ui',
-                    sortNum: 4.2,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'disabled',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Field is disabled?',
-                    hint: 'Set whether or not this field is disabled',
-                    sortGroup: 'control',
-                    sortNum: 2,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'flat',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Flatten?',
-                    hint: 'Removes elevation (shadow) added to element when using the solo or solo-inverted style',
-                    sortGroup: 'ui',
-                    sortNum: 4.1,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'hideDetails',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Hide details?',
-                    hint: 'Hides hint text and validation errors',
-                    sortGroup: 'ui',
-                    sortNum: 3.2,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'placeholder',
-                    type: 'string',
-                    value: 'Placeholder',
-                    uiLabel: 'Placeholder Text',
-                    hint: "Sets the input's placeholder text",
-                    sortGroup: 'ui',
-                    sortNum: 2,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                        'VTextArea'
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'variant',
-                    type: 'select',
-                    lookupKey: 'variant',
-                    value: 'outlined',
-                    uiLabel: 'Style Variant',
-                    hint: 'Applies a distinct style to the input',
-                    sortGroup: 'ui',
-                    sortNum: 4,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'required',
-                    type: 'bool',
-                    value: true,
-                    uiLabel: 'Required?',
-                    hint: 'Set whether or not the field is required',
-                    sortGroup: 'control',
-                    sortNum: 0,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'custom_required',
-                    type: 'radio',
-                    lookupKey: 'requiredMode',
-                    value: 'default',
-                    uiLabel: 'Required Mode',
-                    hint: "Sets whether the field's required status uses the default boolean behaviour, or is calculated using a formula",
-                    sortGroup: 'control',
-                    sortNum: 0.1,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'validateOn',
-                    type: 'select',
-                    lookupKey: 'validateOn',
-                    value: 'aggressive',
-                    uiLabel: 'Validate on...',
-                    hint: "Sets the point at which the validation rules will be applied",
-                    sortGroup: 'validation',
-                    sortNum: 0,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'rules',
-                    type: 'ruleBuilder',
-                    multiple: true,
-                    value: ['required'],
-                    uiLabel: 'Validation Rules',
-                    hint: 'Limit the types of responses users can provide',
-                    sortGroup: 'validation',
-                    sortNum: 0.5,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'readonly',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Readonly?',
-                    hint: 'Sets whether or not the field is readonly',
-                    sortGroup: 'control',
-                    sortNum: 3,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'hint',
-                    type: 'string',
-                    value: '',
-                    uiLabel: 'Hint Text',
-                    hint: 'Provide text that will appear under the input field to hint the user',
-                    sortGroup: 'ui',
-                    sortNum: 3,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'persistentHint',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Persistent Hint?',
-                    hint: 'Sets whether or not the hint is always visible',
-                    sortGroup: 'ui',
-                    sortNum: 3.1,
-                    required: false,
-                    vType: [
-                        'common',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'clearable',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Clearable?',
-                    hint: 'Appends a button which clears the input',
-                    sortGroup: 'ui',
-                    sortNum: 1.1,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                        'VTextArea',
-                        'VSelect',
-                        'VAutocomplete'
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'persistentClear',
-                    type: 'bool',
-                    value: false,
-                    uiLabel: 'Persistent Clear Button?',
-                    hint: 'Sets whether the clear buttons is always visible when the field has input',
-                    sortGroup: 'ui',
-                    sortNum: 1.2,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                        'VTextArea',
-                        'VSelect',
-                        'VAutocomplete'
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'prefix',
-                    type: 'string',
-                    value: '',
-                    uiLabel: 'Field Prefix',
-                    hint: 'Prefixes a UI element to the input field, but does not prefix it to the data recorded',
-                    sortGroup: 'ui',
-                    sortNum: 1.3,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'suffix',
-                    type: 'string',
-                    value: '',
-                    uiLabel: 'Field Suffix',
-                    hint: 'Adds a suffix UI element to the input field, but does not add the suffix to the data recorded',
-                    sortGroup: 'ui',
-                    sortNum: 1.4,
-                    required: false,
-                    vType: [
-                        'VTextField',
-                    ]
-                },
-                {
-                    id: uuid.generateStandard(),
-                    propName: 'autoGrow',
-                    type: 'bool',
-                    value: true,
-                    uiLabel: 'Auto grow?',
-                    hint: 'Automatically grows and shrinks the height of the input as the user types',
-                    sortGroup: 'ui',
-                    sortNum: 1.01,
-                    required: false,
-                    vType: [
-                        'VTextarea'
-                    ]
-                },
+            {
+                id: uuid.generateStandard(),
+                propName: 'type',
+                type: 'select',
+                lookupKey: 'htmlTypes',
+                value: 'text',
+                uiLabel: 'Field Type',
+                hint: '',
+                sortGroup: 'ui',
+                sortNum: 0,
+                required: false,
+                vType: [
+                    'VTextField',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'label',
+                type: 'string',
+                value: 'Label',
+                uiLabel: 'Label',
+                hint: '',
+                sortGroup: 'ui',
+                sortNum: 0,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'density',
+                type: 'select',
+                lookupKey: 'density',
+                value: 'compact',
+                uiLabel: 'Density',
+                hint: 'Set the density of the input field',
+                sortGroup: 'ui',
+                sortNum: 4.2,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'flat',
+                type: 'bool',
+                value: false,
+                uiLabel: 'Flatten?',
+                hint: 'Removes elevation (shadow) added to element when using the solo or solo-inverted style',
+                sortGroup: 'ui',
+                sortNum: 4.1,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'hideDetails',
+                type: 'bool',
+                value: false,
+                uiLabel: 'Hide details?',
+                hint: 'Hides hint text and validation errors',
+                sortGroup: 'ui',
+                sortNum: 3.2,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'placeholder',
+                type: 'string',
+                value: 'Placeholder',
+                uiLabel: 'Placeholder Text',
+                hint: "Sets the input's placeholder text",
+                sortGroup: 'ui',
+                sortNum: 2,
+                required: false,
+                vType: [
+                    'VTextField',
+                    'VTextArea'
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'variant',
+                type: 'select',
+                lookupKey: 'variant',
+                value: 'outlined',
+                uiLabel: 'Style Variant',
+                hint: 'Applies a distinct style to the input',
+                sortGroup: 'ui',
+                sortNum: 4,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'required',
+                type: 'bool',
+                value: true,
+                uiLabel: 'Required?',
+                hint: 'Set whether or not the field is required',
+                sortGroup: 'validation',
+                sortNum: 0,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'validateOn',
+                type: 'select',
+                lookupKey: 'validateOn',
+                value: 'input',
+                uiLabel: 'Validate trigger',
+                hint: "Sets the point at which the validation rules will be applied",
+                sortGroup: 'validation',
+                sortNum: 0,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'rulesBuilder',
+                type: 'button',
+                lookupKey: 'predefinedValidationRules',
+                uiLabel: 'Validation Rules',
+                hint: 'Limit the types of responses users can provide',
+                sortGroup: 'validation',
+                sortNum: 0.5,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'hint',
+                type: 'string',
+                value: '',
+                uiLabel: 'Hint Text',
+                hint: 'Provide text that will appear under the input field to hint the user',
+                sortGroup: 'ui',
+                sortNum: 3,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'persistentHint',
+                type: 'bool',
+                value: false,
+                uiLabel: 'Persistent Hint?',
+                hint: 'Sets whether or not the hint is always visible',
+                sortGroup: 'ui',
+                sortNum: 3.1,
+                required: false,
+                vType: [
+                    'common',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'clearable',
+                type: 'bool',
+                value: false,
+                uiLabel: 'Clearable?',
+                hint: 'Appends a button which clears the input',
+                sortGroup: 'ui',
+                sortNum: 1.1,
+                required: false,
+                vType: [
+                    'VTextField',
+                    'VTextArea',
+                    'VSelect',
+                    'VAutocomplete'
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'persistentClear',
+                type: 'bool',
+                value: false,
+                uiLabel: 'Persistent Clear Button?',
+                hint: 'Sets whether the clear buttons is always visible when the field has input',
+                sortGroup: 'ui',
+                sortNum: 1.2,
+                required: false,
+                vType: [
+                    'VTextField',
+                    'VTextArea',
+                    'VSelect',
+                    'VAutocomplete'
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'prefix',
+                type: 'string',
+                value: '',
+                uiLabel: 'Field Prefix',
+                hint: 'Prefixes a UI element to the input field, but does not prefix it to the data recorded',
+                sortGroup: 'ui',
+                sortNum: 1.3,
+                required: false,
+                vType: [
+                    'VTextField',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'suffix',
+                type: 'string',
+                value: '',
+                uiLabel: 'Field Suffix',
+                hint: 'Adds a suffix UI element to the input field, but does not add the suffix to the data recorded',
+                sortGroup: 'ui',
+                sortNum: 1.4,
+                required: false,
+                vType: [
+                    'VTextField',
+                ],
+            },
+            {
+                id: uuid.generateStandard(),
+                propName: 'autoGrow',
+                type: 'bool',
+                value: true,
+                uiLabel: 'Auto grow?',
+                hint: 'Automatically grows and shrinks the height of the input as the user types',
+                sortGroup: 'ui',
+                sortNum: 1.01,
+                required: false,
+                vType: [
+                    'VTextarea'
+                ],
+            },
             ],
 
         staticChoices: {
             density: [
-                'default',
-                'comfortable',
-                'compact'
+                { title: 'Tall', value: 'default', props: { subtitle: 'No density' } },
+                { title: 'Medium', value: 'comfortable', props: { subtitle: 'Medium density' } },
+                { title: 'Small', value: 'compact', props: { subtitle: 'Default density, compact' } },
             ],
             variant: [
                 'filled',
@@ -653,6 +411,12 @@ export const useElementStore = defineStore('elements', {
                 'default',
                 'formula'
             ],
+            requiredChoices: [
+                { title: 'Required', value: 'required', props: { subtitle: 'Require a response' } },
+                { title: 'Not Required', value: 'not_required', props: { subtitle: 'Allow optional responses' } },
+                { title: 'Predefined Validation Rule', value: 'validation_rule', props: { subtitle: 'Require a response, using a predefined validation rule' } },
+                { title: 'Use a formula', value: 'formula', props: { subtitle: 'Require a response using a custom formula' } },
+            ],
             htmlTypes: [
                 'text',
                 'number',
@@ -662,19 +426,39 @@ export const useElementStore = defineStore('elements', {
                 'password',
             ],
             validateOn: [
-                { name: 'input', subtitle: 'Triggers immediately upon input', },
-                { name: 'blur', subtitle: 'Triggers after the user has entered data and move away from the field', },
-                { name: 'lazy', subtitle: 'A mixture of aggressive and lazy', },
-                { name: 'submit', subtitle: 'Requires a manual validation trigger', },
+                { title: 'Immediate', value: 'input', props: { subtitle: 'Triggers immediately upon input' } },
+                { title: 'After', value: 'blur', props: { subtitle: 'Triggers after the user has entered data and move away from the field' } },
+                { title: 'Soon', value: 'lazy', props: { subtitle: 'After input, but before moving away' } },
+                { title: 'Manual', value: 'submit', props: { subtitle: 'Requires a manual validation trigger' } },
+            ],
+            predefinedValidationRules: [
+                { title: 'Required', value: rules.notBlank , props: {subtitle: 'Require a response of some kind'} },
+                { title: 'Email', value: rules.email, props: {subtitle: 'The response must be in the form of an email address'} }
             ]
         },
+        propSortOrder: [
+            'type',
+            'label',
+            'prefix',
+            'suffix',
+            'autoGrow',
+            'placeholder',
+            'clearable',
+            'persistentClear',
+            'density',
+            'variant',
+            'flat',
+            'hint',
+            'persistentHint',
+            'hideDetails',
+        ]
 
     }),
     getters: {
         choices: (state) => state.staticChoices
     },
     actions: {
-        getElements(/** @type {string} */ kind) {
+        getElements: function(/** @type {string} */ kind) {
 
             // determine which type of element's have been requested
             let arrName = ''
@@ -743,38 +527,33 @@ export const useElementStore = defineStore('elements', {
                             }
                         }
                     }
-                    
                 }
-
             }
 
-            // const common = {...this.detailsPanelOptions.common}
-            // console.log("🚀 ~ file: elementStore.js:291 ~ getElements ~ common:", common)
-
-            // for (let i = 0; i < arr.length; i++) {
-            //     if (typeof arr[i].type === typeof undefined) {
-            //         arr[i].templateId = i + 1
-            //         arr[i].options = {...common, ...this.detailsPanelOptions[arr[i].vType]}
-            //     }
-            // }
-
             return arr
-
         },
-        getBlankSection() {
+        getBlankSection: function() {
             const arr = [...this.getElements('section')]
             return arr[1]
         },
-        getChoicesByKey( /** @type {string} */ key) {
+        getChoicesByKey: function( /** @type {string} */ key) {
             return this.staticChoices[key] || []
         },
-        saveAlert() {
+        saveAlert: function() {
             //this.alerts.push(payload)
         },
-        clearAlerts() {
+        clearAlerts: function() {
             //this.alerts = []
         },
-        populateDetailsPanel() {
+        createPropsArray: function(/** @type {array} */ propsRequired) {
+            let _props = []
+            for (let i = 0; i < propsRequired.length; i++) {
+                _props.push(this.detailsPanelOptions.filter(a => a.propName === propsRequired[i])[0])
+            }
+            return _props
+
+        },
+        populateDetailsPanel: function() {
             // we need to get every item from the detailsPanelOptions array,
             // but they need to be grouped and sorted first.
 
@@ -793,7 +572,6 @@ export const useElementStore = defineStore('elements', {
             }
 
             const returnArr = JSON.parse(JSON.stringify(_pArr))
-            console.log("🚀 ~ file: elementStore.js:796 ~ populateDetailsPanel ~ returnArr:", returnArr)
             
             return [...returnArr]
             

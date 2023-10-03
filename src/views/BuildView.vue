@@ -136,7 +136,6 @@ export default {
             return newElement
         },
         updateDetailsPanelFor: function(obj) {
-            console.log("🚀 ~ file: BuildView.vue:119 ~ obj:", obj)
             this.selectedSection = ( typeof obj.section === typeof undefined ? -1 : obj.section )
             this.selectedField = ( typeof obj.field === typeof undefined ? -1 : obj.field )
         },
@@ -155,75 +154,13 @@ export default {
                 return ''
             }
         },
-        setMethodModelValue: function(propName, args) {
-            console.log("🚀 ~ file: BuildView.vue:157 ~ propName, args:", propName, args)
+        setMethodModelValue: function(propName, val) {
+            if (this.selectedField > -1) {
+                this.form.sections[this.selectedSection].elements[this.selectedField].props[propName] = val
+            } else if (this.selectedSection > -1) {
+                this.form.sections[this.selectedSection][propName] = val
+            }
         }
-        // moveElement: function(/** @type {Object} */ obj) {
-        // console.log("🚀 ~ file: BuildView.vue:129 ~ obj:", obj)
-
-        //     let moveAllowed = false
-        //     let moving = ''
-
-        //     // if selectedField < 0, we are moving a whole section
-        //     if (this.selectedField < 0) {
-        //         // moving a whole section
-        //         moving = 'section'
-
-        //         // for sections
-        //             // if selectedSection === 0, this at the top, cannot move up
-        //             // if selectedSection === form.sections.length, this is at the bottom, cannot move down
-
-        //         if (direction === 'up') {
-        //             // user wants to move the element up.
-        //             if (this.selectedSection > 0) {
-        //                 // element is not at the top, can be moved up
-        //                 moveAllowed = true
-        //             }
-        //         } else if (direction === 'down') {
-        //             // user want to move the element down
-        //             if (this.selectedSection < this.form.sections.length) {
-        //                 // element is not at the bottom, can be moved down
-        //                 moveAllowed = true
-        //             }
-        //         }
-                
-        //     } else {
-        //         // moving an input/ui element within a section
-        //         moving = 'field'
-
-        //         // for inputs/ui elements
-        //             // if selectedField === 0, this is at the top, cannot move up
-        //             // if selectedField === form.sections[selectedSection].elements.length, this is at the bottom, cannot move down
-
-        //         if (direction === 'up') {
-        //             // user want to move the input/ui element up
-        //             if (this.selectedField > 0) {
-        //                 // element is not at the top, move is allowed
-        //                 moveAllowed = true
-        //             }
-        //         } else if (direction === 'down') {
-        //             // user wants to move the element down
-        //             if (this.selectedField < this.form.sections[this.selectedSection].elements.length) {
-        //                 // element is not at the bottom, move is allowed
-        //                 moveAllowed = true
-        //             }
-        //         }
-        //     }
-
-
-        //     if (moveAllowed) {
-        //         // the move is allowed
-
-        //         if (moving === 'section') {
-        //             const element = this.form.sections[this.selectedSection]
-        //             this.form.sections.splice(this.selectedSection, 1)
-        //             this.form.sections.splice((direction === 'up' ? this.selectedSection - 1 : this.selectedSection + 1), 0, element)
-        //         }
-        //     }
-
-            
-
-        // },
     }
 }
 </script>
@@ -233,7 +170,7 @@ export default {
     :show="ready.loading">
     </LoadingOverlay>
     <template v-if="!ready.hideUI">
-        <PeekCode
+        <!-- <PeekCode
         :show="showCode"
         @update="showCode = $event">
             <template #title>
@@ -253,7 +190,7 @@ export default {
                     {{ JSON.stringify(form, null, 1) }}
                 </pre>
             </template>
-        </PeekCode>
+        </PeekCode> -->
         <ModalView
         :show="modalControl.show"
         @dismiss="modalControl.show = $event"
@@ -263,12 +200,47 @@ export default {
                 <template v-if="modalControl.kind === 'delete'">
                     Are you sure?
                 </template>
+                <template v-if="modalControl.kind === 'peekCode'">
+                    Peek Code
+                </template>
+                <template v-if="modalControl.kind === 'formEditor'">
+                    Edit Form
+                </template>
+                <template v-if="modalControl.kind === 'sectionEditor'">
+                    Edit Section
+                </template>
+                <template v-if="modalControl.kind === 'elementEditor'">
+                    Edit Element
+                </template>
             </template>
 
             <template #body>
                 <template v-if="modalControl.kind === 'delete'">
                     Are you sure want to delete {{ (selectedField > -1 ? `Field ${selectedField + 1} from ` : '' ) }} {{ (selectedSection > -1 ? `Section ${selectedSection + 1}` : '') }}?
                     <br>
+                </template>
+                <template v-if="modalControl.kind === 'peekCode'">
+                    <pre>
+                        {{ JSON.stringify(form, null, 1) }}
+                    </pre>
+                </template>
+                <template v-if="modalControl.kind === 'formEditor'">
+                    <pre>
+                        {{ JSON.stringify(form, null, 1) }}
+                    </pre>
+                </template>
+                <template v-if="modalControl.kind === 'sectionEditor'">
+                    <pre>
+                        {{ JSON.stringify(form.sections[selectedSection], null, 1) }}
+                    </pre>
+                </template>
+                <template v-if="modalControl.kind === 'elementEditor'">
+                    <v-row>
+                        <v-col></v-col>
+                    </v-row>
+                    <pre>
+                        {{ JSON.stringify(form.sections[selectedSection].elements[selectedField], null, 1) }}
+                    </pre>
                 </template>
             </template>
 
@@ -393,14 +365,20 @@ export default {
                             text="Edit Form Details"
                             location="bottom">
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" icon="mdi-form-textbox"></v-btn>
+                                    <v-btn
+                                    v-bind="props"
+                                    icon="mdi-form-textbox"
+                                    @click="modalControl = { show: true, kind: 'formEditor' }"></v-btn>
                                 </template>
                             </v-tooltip>
                             <v-tooltip
                             text="Peek Code"
                             location="bottom">
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" icon="mdi-code-json" @click="showCode = true"></v-btn>
+                                    <v-btn
+                                    v-bind="props"
+                                    icon="mdi-code-json"
+                                    @click="modalControl = { show: true, kind: 'peekCode'}"></v-btn>
                                 </template>
                             </v-tooltip>
                             <v-tooltip
@@ -441,16 +419,17 @@ export default {
                                             density="compact"
                                             class="draggableItem handle"
                                             >
-                                                <CSpacer :horizontal="true"></CSpacer>
-                                                <v-icon :icon="section.icon" ></v-icon>
-                                                <v-toolbar-title>{{ `[${sectionIndex + 1}] ${section.name}` }} ({{ section.elements.length }} elements)</v-toolbar-title>
-                                                <IdChip
-                                                :instance-id="section.instanceId"
-                                                parent-type="form"
-                                                ></IdChip>
-                                                <CSpacer :horizontal="true"></CSpacer>
+                                            <CSpacer :horizontal="true"></CSpacer>
+                                            <v-icon :icon="section.icon" ></v-icon>
+                                            <v-toolbar-title>{{ `[${sectionIndex + 1}] ${section.name}` }} ({{ section.elements.length }} element{{section.elements.length > 1 ? 's' : ''}})</v-toolbar-title>
+                                            <IdChip
+                                            :instance-id="section.instanceId"
+                                            parent-type="form"
+                                            ></IdChip>
+                                            <CSpacer :horizontal="true"></CSpacer>
+                                            <!-- @edit="updateDetailsPanelFor({ section: sectionIndex, field: -1 })" -->
                                                 <ToolbarButtons
-                                                @edit="updateDetailsPanelFor({ section: sectionIndex, field: -1 })"
+                                                @edit="selectedSection = sectionIndex; selectedField = -1; modalControl = { show: true, kind: 'sectionEditor'}"
                                                 @delete="selectedSection = sectionIndex; selectedField = -1; modalControl = { show: true, kind: 'delete'}"></ToolbarButtons>
                                             </v-toolbar>
 
@@ -469,6 +448,7 @@ export default {
                                                             <ElementTemplate
                                                             :source="field"
                                                             :index="fieldIndex"
+                                                            @update:props="$event => field.props = $event"
                                                             >
                                                         
                                                                 <template #toolbarAppendSlot>
@@ -479,7 +459,7 @@ export default {
                                                                     ></IdChip>
                                                                     <CSpacer :horizontal="true"></CSpacer>
                                                                     <ToolbarButtons
-                                                                    @edit="updateDetailsPanelFor({ section: sectionIndex, field: fieldIndex })"
+                                                                    @edit="selectedSection = sectionIndex; selectedField = fieldIndex; modalControl = { show: true, kind: 'elementEditor'}"
                                                                     @delete="selectedSection = sectionIndex; selectedField = fieldIndex; modalControl = { show: true, kind: 'delete'}"></ToolbarButtons>
                                                                 </template>
                                                             </ElementTemplate>
@@ -510,7 +490,7 @@ export default {
             </v-container>
         </v-main>
             
-        <v-navigation-drawer
+        <!-- <v-navigation-drawer
         location="right"
         :rail="hideDetailsPanel">
             <BuildToolbar
@@ -533,7 +513,6 @@ export default {
                             parent-type="section"
                             ></IdChip>
                         </template>
-                        <div></div>
                         <div>
                             <v-list
                             v-for="(option, optionIndex) in detailsPanel"
@@ -547,21 +526,23 @@ export default {
                                     </v-list-subheader>
                                     <v-divider></v-divider>
                                 </div>
-                                <div v-else>
+                                <div v-else-if="option.shouldRender">
                                     <v-list-item>
-
                                         <CSpacer :vertical="true"></CSpacer>
-
+                                        
                                         <template v-if="option.type === 'select'">
                                             <v-select
                                             variant="outlined"
                                             density="compact"
                                             :label="option.uiLabel"
-                                            persistent-hint
+                                            item-title="title"
+                                            item-value="value"
+                                            :persistent-hint="(option.hint !== '' || typeof option.hint !== typeof undefined)"
+                                            :hide-details="(option.hint === '' || typeof option.hint === typeof undefined)"
                                             :hint="option.hint"
                                             :items="elements.getChoicesByKey(option.lookupKey)"
-                                            :value="methodModelValue(option.propName)"
-                                            @change="$event => setMethodModelValue($event)"
+                                            :model-value="methodModelValue(option.propName)"
+                                            @update:modelValue="$event => setMethodModelValue(option.propName, $event)"
                                             ></v-select>
                                         </template>
 
@@ -570,8 +551,11 @@ export default {
                                             variant="outlined"
                                             density="compact"
                                             :label="option.uiLabel"
-                                            persistent-hint
+                                            :persistent-hint="(option.hint !== '' || typeof option.hint !== typeof undefined)"
+                                            :hide-details="(option.hint === '' || typeof option.hint === typeof undefined)"
                                             :hint="option.hint"
+                                            :value="methodModelValue(option.propName)"
+                                            @update:modelValue="$event => setMethodModelValue(option.propName, $event)"
                                             ></v-text-field>
                                         </template>
 
@@ -580,88 +564,33 @@ export default {
                                             variant="outlined"
                                             density="compact"
                                             :label="option.uiLabel"
-                                            persistent-hint
+                                            :persistent-hint="(option.hint !== '' || typeof option.hint !== typeof undefined)"
+                                            :hide-details="(option.hint === '' || typeof option.hint === typeof undefined)"
                                             :hint="option.hint"
+                                            :model-value="methodModelValue(option.propName)"
+                                            @update:modelValue="$event => setMethodModelValue(option.propName, $event)"
                                             ></v-checkbox>
                                         </template>
 
-                                        <template v-if="option.type === 'radio'">
-                                            <v-radio-group
-                                            variant="outlined"
-                                            density="compact"
-                                            :label="option.uiLabel"
-                                            :hint="option.hint"
-                                            persistent-hint
-                                            >
-                                                <v-radio
-                                                v-for="radio in elements.getChoicesByKey(option.lookupKey)"
-                                                :key="radio"
-                                                :label="radio" value="radio"></v-radio>
-                                            </v-radio-group>
+                                        <template v-if="option.type === 'button'">
+                                            <v-btn
+                                            block
+                                            color="primary"
+                                            @click="modalControl = { show: true, kind: option.propName }">
+                                                {{ option.uiLabel }}
+                                            </v-btn>
                                         </template>
-
+                                        
                                         <CSpacer :vertical="true"></CSpacer>
                                     </v-list-item>
                                 </div>
-                                
-
                             </v-list>
-                                <!-- <v-list-item>
-                                    {{ uiLabel }}
-                                    <CSpacer :vertical="true"></CSpacer>
-                                    <template
-                                    v-if="option.type === 'string'">
-                                        <v-text-field
-                                        density="compact"
-                                        variant="outlined"
-                                        :hint="option.hint"
-                                        :persistent-hint="true"
-                                        ></v-text-field>
-                                    </template>
-
-                                    <template
-                                    v-if="option.type === 'bool'">
-                                        <v-checkbox
-                                        :hint="option.hint"
-                                        :persistent-hint="true"
-                                        :label="String(option.value)"
-                                        ></v-checkbox>
-                                    </template>
-
-                                    <template
-                                    v-if="option.type === 'select'">
-                                        <v-select
-                                        density="compact"
-                                        variant="outlined"
-                                        :hint="option.hint"
-                                        :persistent-hint="true"
-                                        :items="elements.getChoicesByKey(option)"
-                                        ></v-select>
-                                    </template>
-
-                                    <template
-                                    v-if="option.type === 'radio'">
-                                        <v-radio-group
-                                        :hint="option.hint"
-                                        :persistent-hint="true"
-                                        density="compact">
-                                            <v-radio
-                                            v-for="radio in elements.getChoicesByKey(option)"
-                                            :key="radio"
-                                            :label="radio" value="radio"></v-radio>
-                                        </v-radio-group>
-                                    </template>
-                                        
-                                </v-list-item>
-                                <CSpacer :vertical="true" ></CSpacer> -->
-                                
-                            <!-- </v-list> -->
                         </div>
                     
                 </template>
 
             </BuildToolbar>
-        </v-navigation-drawer>
+        </v-navigation-drawer> -->
     </template>
 </template>
 

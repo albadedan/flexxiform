@@ -1,9 +1,15 @@
 <script>
 import CSpacer from './CSpacer.vue'
+import { useElementStore } from '../stores/elementStore'
 export default {
+    setup() {
+        const elements = useElementStore()
+        return { elements }
+    },
     components: {
         CSpacer,
     },
+    emits: ['update:props'],
     props: {
         source: {
             // The data source for the component
@@ -17,16 +23,32 @@ export default {
     },
     data() {
         return {
-            hover: false
+            hover: false,
+            localProps: {},
+            propertyObjects: new Array()
         }
     },
+    mounted() {
+        this.init()
+    },
+    methods: {
+        init() {
+            this.localProps = this.source.props
+            this.propertyObjects = [...this.elements.createPropsArray(Object.keys(this.localProps))]
+        }
+    },
+    watch: {
+        localProps(newValue) {
+            this.$emit('update:props', this.localProps)
+        }
+    }
 }
 </script>
 
 <template>
     <div>
         <v-card
-        v-memo="[source.props]"
+        v-memo="[source]"
         elevation="1"
         variant="outlined"
         :hover="!hover"
@@ -45,7 +67,7 @@ export default {
                 </slot>
             </v-toolbar>
             <v-container>
-                <v-row>
+                <v-row dense>
                     <v-col>
 
                         <!-- Single line Text Field -->
@@ -67,9 +89,11 @@ export default {
                         <!-- Checkbox Field -->
                         <template
                         v-if="source.vTypeMaster === 'VCheckbox'">
-                            <v-checkbox
-                            v-bind.prop="source.props"
-                            ></v-checkbox>
+                            <v-item-group>
+                                <v-checkbox
+                                v-bind.prop="source.props"
+                                ></v-checkbox>
+                            </v-item-group>
                         </template>
 
                         <!-- Switch Field -->
@@ -120,6 +144,27 @@ export default {
                             ></v-file-input>
                         </template>
 
+                    </v-col>
+                </v-row>
+                <v-row dense>
+                    <v-col>
+                        <v-expansion-panels>
+                            <v-expansion-panel
+                            title="Properties">
+                                <v-expansion-panel-text>
+                                    <v-row
+                                    v-for="(option, optionIndex) in elements.propSortOrder" :key="option"
+                                    dense>
+                                        <v-col>
+                                            {{ propertyObjects.filter(a => a.propName === option)[0] }}
+                                        </v-col>
+                                    </v-row>
+                                    <pre>
+                                        {{ JSON.stringify(source, null, 1) }}
+                                    </pre>
+                                </v-expansion-panel-text>
+                            </v-expansion-panel>
+                        </v-expansion-panels>
                     </v-col>
                 </v-row>
             </v-container>
